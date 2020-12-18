@@ -84,6 +84,7 @@ void UpdateMode(AsyncWebServerRequest *request)
     else
     {
       CreateNewMode(mode, request);
+      currMode = mode;
     }
   }
 }
