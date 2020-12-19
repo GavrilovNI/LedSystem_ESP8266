@@ -41,7 +41,7 @@ const char index_html[] PROGMEM = R"rawliteral(
       {
         const mode = document.getElementById('mode').value;
         var coloredModes = ['simple', 'grow', 'grownback', 'grownback2center'];
-        bool showColor = false;
+        var showColor = false;
         coloredModes.forEach(function(item, index, array) {
           if(mode==item)
             showColor=true;
