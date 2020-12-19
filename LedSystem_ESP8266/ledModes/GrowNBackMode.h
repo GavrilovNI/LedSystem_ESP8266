@@ -1,5 +1,5 @@
-#ifndef GROW_N_BACK_MODE
-#define GROW_N_BACK_MODE
+#ifndef GROW_N_BACK_MODE_H
+#define GROW_N_BACK_MODE_H
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
@@ -8,9 +8,9 @@
 class GrowNBackMode : public GrowMode
 {
   protected:
-  bool growing=true;
 
   public:
+  bool growing=true;
 
   GrowNBackMode(CRGB color0, CRGB color1=CRGB::Black, int startId = 0, int count = LED_COUNT) : GrowMode(color0, color1, startId, count)
   {
@@ -65,4 +65,4 @@ class GrowNBackMode : public GrowMode
   }
 };
 
-#endif // GROW_N_BACK_MODE
+#endif // GROW_N_BACK_MODE_H

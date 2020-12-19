@@ -1,5 +1,5 @@
-#ifndef COLORED_MODE
-#define COLORED_MODE
+#ifndef COLORED_MODE_H
+#define COLORED_MODE_H
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
@@ -75,4 +75,4 @@ class ColoredMode: public LedMode
 
 
 
-#endif // COLORED_MODE
+#endif // COLORED_MODE_H

@@ -1,5 +1,5 @@
-#ifndef MAIN_KITCHEN_LED
-#define MAIN_KITCHEN_LED
+#ifndef LED_SYSTEM_ESP8266_INO
+#define LED_SYSTEM_ESP8266_INO
 
 #include <ArduinoOTA.h>
 #include <ESP8266WiFi.h>
@@ -9,9 +9,11 @@
 
 
 #include "leds.h"
+#include "wifiBuilding.h"
 #include "wifiSettings.h"
 
 #include "ledModes/LedMode.h"
+#include "ledModes/LayerMode.h"
 #include "ledModes/SimpleMode.h"
 #include "ledModes/RainbowMode.h"
 #include "ledModes/RainbowFadeMode.h"
@@ -205,4 +207,4 @@ void loop()
   }
 }
 
-#endif // MAIN_KITCHEN_LED
+#endif // LED_SYSTEM_ESP8266_INO

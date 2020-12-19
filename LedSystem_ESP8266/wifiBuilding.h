@@ -1,5 +1,5 @@
-#ifndef WIFI_BUILDING
-#define WIFI_BUILDING
+#ifndef WIFI_BUILDING_H
+#define WIFI_BUILDING_H
 
 //functions of uploads stages (start, progress, end and error)
 void startOTA()
@@ -73,4 +73,4 @@ void loopWifiBuilding()
   ArduinoOTA.handle();
 }
 
-#endif // WIFI_BUILDING
+#endif // WIFI_BUILDING_H

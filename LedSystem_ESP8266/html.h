@@ -1,3 +1,6 @@
+#ifndef HTML_H
+#define HTML_H
+
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML>
 <html>
@@ -15,6 +18,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     <option value="rainbowfade">Rainbow Fade</option>
     <option value="grow">Grow</option>
     <option value="grownback">Grow & Back</option>
+    <option value="grownback2center">Grow & Back 2 center</option>
   </select><br/>
   
   <div id="colorDiv">
@@ -36,7 +40,13 @@ const char index_html[] PROGMEM = R"rawliteral(
     function updateMode()
       {
         const mode = document.getElementById('mode').value;
-        showStuff('colorDiv', mode=='simple' || mode=='grow' || mode=='grownback');
+        var coloredModes = ['simple', 'grow', 'grownback', 'grownback2center'];
+        bool showColor = false;
+        coloredModes.forEach(function(item, index, array) {
+          if(mode==item)
+            showColor=true;
+        });
+        showStuff('colorDiv', showColor);
         showStuff('on', mode!='off');
       }
   
@@ -59,3 +69,5 @@ const char index_html[] PROGMEM = R"rawliteral(
 </body>
 </html>
 )rawliteral";
+
+#endif // HTML_H

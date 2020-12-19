@@ -1,5 +1,5 @@
-#ifndef LED_MODE
-#define LED_MODE
+#ifndef LED_MODE_H
+#define LED_MODE_H
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
@@ -21,8 +21,6 @@ class LedMode
 
   virtual void Update(AsyncWebServerRequest *request) { }
 
-  virtual bool HasColor() const { return false; }
-
   virtual void Draw(Leds* leds) const
   {
     for(int i=startId; i < count; i++)
@@ -38,4 +36,4 @@ class LedMode
 
 
 
-#endif // LED_MODE
+#endif // LED_MODE_H

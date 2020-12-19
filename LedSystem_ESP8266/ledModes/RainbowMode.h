@@ -1,5 +1,5 @@
-#ifndef RAINBOW_MODE
-#define RAINBOW_MODE
+#ifndef RAINBOW_MODE_H
+#define RAINBOW_MODE_H
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
@@ -34,4 +34,4 @@ class RainbowMode : public LedMode
   }
 };
 
-#endif // RAINBOW_MODE
+#endif // RAINBOW_MODE_H

@@ -1,5 +1,5 @@
-#ifndef GROW_MODE
-#define GROW_MODE
+#ifndef GROW_MODE_H
+#define GROW_MODE_H
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
@@ -39,4 +39,4 @@ class GrowMode : public SplitMode
   }
 };
 
-#endif // GROW_MODE
+#endif // GROW_MODEH

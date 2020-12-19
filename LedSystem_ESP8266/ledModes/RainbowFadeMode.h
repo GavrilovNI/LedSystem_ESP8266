@@ -1,5 +1,5 @@
-#ifndef RAINBOW_FADE_MODE
-#define RAINBOW_FADE_MODE
+#ifndef RAINBOW_FADE_MODE_H
+#define RAINBOW_FADE_MODE_H
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
@@ -19,4 +19,4 @@ class RainbowFadeMode : public RainbowMode
   }
 };
 
-#endif // RAINBOW_FADE_MODE
+#endif // RAINBOW_FADE_MODE_H

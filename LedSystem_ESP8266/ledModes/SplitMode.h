@@ -1,5 +1,5 @@
-#ifndef SPLIT_MODE
-#define SPLIT_MODE
+#ifndef SPLIT_MODE_H
+#define SPLIT_MODE_H
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
@@ -8,15 +8,26 @@
 class SplitMode : public ColoredMode
 {
   protected:
-  int currId = 0;
+  int currId;
   public:
 
   SplitMode(CRGB color1, CRGB color2=CRGB::Black, int startId = 0, int count = LED_COUNT) : ColoredMode(std::vector<CRGB>{color1, color2}, startId, count)
   {
+	  currId = startId;
   }
   SplitMode(AsyncWebServerRequest *request, int startId = 0, int count = LED_COUNT) : ColoredMode(request, startId, count)
   {
+	  currId = startId;
 	  this->Update(request);
+  }
+  
+  void SetCurrId(int id)
+  {
+    currId=id;
+    if(currId<startId)
+	  currId=startId;
+	else if(currId>startId+count)
+	  currId=startId+count;
   }
   
   virtual void Update(AsyncWebServerRequest *request) override
@@ -32,14 +43,14 @@ class SplitMode : public ColoredMode
   {
 	currId++;
 	if(currId>count)
-	  currId=0;
+	  currId=startId;
     return *this;
     
   }
   virtual LedMode& operator--() override
   {
     currId--;
-	if(currId<0)
+	if(currId<startId)
 	  currId=count;
     return *this;
   }
@@ -50,4 +61,4 @@ class SplitMode : public ColoredMode
   }
 };
 
-#endif // SPLIT_MODE
+#endif // SPLIT_MODE_H

@@ -1,5 +1,5 @@
-#ifndef SIMPLE_MODE
-#define SIMPLE_MODE
+#ifndef SIMPLE_MODE_H
+#define SIMPLE_MODE_H
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
@@ -22,4 +22,4 @@ class SimpleMode : public ColoredMode
   }
 };
 
-#endif // SIMPLE_MODE
+#endif // SIMPLE_MODE_H
