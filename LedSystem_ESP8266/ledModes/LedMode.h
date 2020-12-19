@@ -3,6 +3,7 @@
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
+#include "../leds.h"
 
 class LedMode
 {
@@ -22,11 +23,11 @@ class LedMode
 
   virtual bool HasColor() const { return false; }
 
-  virtual void Draw() const
+  virtual void Draw(Leds* leds) const
   {
     for(int i=startId; i < count; i++)
     {
-      leds[i] = GetPixel(i);
+      (*leds)[i] = GetPixel(i);
     }
   }
   virtual CRGB GetPixel(int id) const = 0;

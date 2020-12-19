@@ -15,32 +15,58 @@
 
 #define LED_COUNT 120
 #define LED_DT 3
-
-int max_bright = 51;
-
-struct CRGB leds[LED_COUNT];
-
-void fill(CRGB color, int startId = 0, int count = LED_COUNT)
-{
-  for (int i = startId ; i < startId + LED_COUNT; i++ )
-  {
-    leds[i] = color;
-  }
-}
+#define DEFAULT_BRIGHTNESS 50
 
 CHSV getRainbow(int startHue, int maxCount = 1, int num = 0)
 {
   return CHSV(((int)(startHue + 255.0 * num / maxCount)) % 256, 255, 255);
 }
 
-
-void setupLeds()
+class Leds
 {
-  LEDS.setBrightness(max_bright);
-  LEDS.addLeds<WS2811, LED_DT, GRB>(leds, LED_COUNT);
-  fill(CRGB::HTMLColorCode::Black);
-  LEDS.show();
-}
+  protected:
+  CRGB* leds;
+  int count;
+  
+  public:
+  Leds(int count = LED_COUNT)
+  {
+    this->count = count;
+    leds = new CRGB[count];
+    FastLED.addLeds<WS2811, LED_DT, GRB>(leds, count);
+    FastLED.setBrightness(DEFAULT_BRIGHTNESS);
+    this->fill(CRGB::Black);
+    this->Show();
+  }
+  ~Leds()
+  {
+    delete[] leds;
+  }
+
+  CRGB& operator[](int index) const
+  {
+    return leds[index];
+  } 
+
+  void fill(CRGB color, int startId, int count)
+  {
+    for (int i = startId ; i < startId + count; i++ )
+    {
+      this->leds[i] = color;
+    }
+  }
+  void fill(CRGB color)
+  {
+    fill(color, 0, count);
+  }
+
+  void Show() const
+  {
+    FastLED.show();
+  }
+};
+
+
 
 
 #endif // LEDS_H

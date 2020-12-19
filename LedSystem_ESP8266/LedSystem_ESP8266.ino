@@ -11,12 +11,12 @@
 #include "leds.h"
 #include "wifiSettings.h"
 
-#include "ledMods/LedMode.h"
-#include "ledMods/SimpleMode.h"
-#include "ledMods/RainbowMode.h"
-#include "ledMods/RainbowFadeMode.h"
-#include "ledMods/GrowMode.h"
-#include "ledMods/GrowNBackMode.h"
+#include "ledModes/LedMode.h"
+#include "ledModes/SimpleMode.h"
+#include "ledModes/RainbowMode.h"
+#include "ledModes/RainbowFadeMode.h"
+#include "ledModes/GrowMode.h"
+#include "ledModes/GrowNBackMode.h"
 
 #include "utils.h"
 #include "html.h"
@@ -64,7 +64,7 @@ void tryConnectToWifi()
 }
 
 
-
+Leds leds;
 LedMode* ledMode;
 String currMode = "off";
 
@@ -99,7 +99,7 @@ bool CreateNewMode(String mode, AsyncWebServerRequest *request)
 
   if(mode=="off")
   {
-    fill(CRGB::Black);
+    leds.fill(CRGB::Black);
     LEDS.show();
   }
   else if(mode=="simple")
@@ -137,8 +137,6 @@ void setup()
   wifiMulti.addAP(ssid, password);
   connectToWifi();
   setupWifiBuilding();
-
-  setupLeds();
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html);
@@ -183,8 +181,8 @@ void loop()
   if(ledMode!=nullptr)
   {
     
-    ledMode->Draw();
-    LEDS.show();
+    ledMode->Draw(&leds);
+    leds.Show();
 
     if (speed==0)
     {
