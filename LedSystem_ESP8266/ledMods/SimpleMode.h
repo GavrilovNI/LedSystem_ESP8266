@@ -3,7 +3,6 @@
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
-#include "LedMode.h"
 #include "ColoredMode.h"
 
 class SimpleMode : public ColoredMode
@@ -19,7 +18,7 @@ class SimpleMode : public ColoredMode
 
   virtual CRGB GetPixel(int id) const override
   {
-    return color;
+    return GetColor(0);
   }
 };
 

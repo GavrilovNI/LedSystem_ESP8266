@@ -16,6 +16,7 @@
 #include "ledMods/RainbowMode.h"
 #include "ledMods/RainbowFadeMode.h"
 #include "ledMods/GrowMode.h"
+#include "ledMods/GrowNBackMode.h"
 
 #include "utils.h"
 #include "html.h"
@@ -113,9 +114,14 @@ bool CreateNewMode(String mode, AsyncWebServerRequest *request)
   {
     ledMode = new RainbowFadeMode();
   }
-  else if(mode=="growing")
+  else if(mode=="grow")
   {
     ledMode = new GrowMode(request);
+  }
+  
+  else if(mode=="grownback")
+  {
+    ledMode = new GrowNBackMode(request);
   }
   else
   {

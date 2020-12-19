@@ -3,52 +3,39 @@
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
-#include "LedMode.h"
-#include "ColoredMode.h"
+#include <algorithm>
+#include "SplitMode.h"
 
-class GrowMode : public ColoredMode
+class GrowMode : public SplitMode
 {
-  protected:
-  int currId = 0;
-  bool growing=true;
 
   public:
 
-  GrowMode(CRGB color, int startId = 0, int count = LED_COUNT) : ColoredMode(color, startId, count)
+  GrowMode(CRGB color0, CRGB color1=CRGB::Black, int startId = 0, int count = LED_COUNT) : SplitMode(color0, color1, startId, count)
   {
   }
-  GrowMode(AsyncWebServerRequest *request, int startId = 0, int count = LED_COUNT) : ColoredMode(request, startId, count)
+  GrowMode(AsyncWebServerRequest *request, int startId = 0, int count = LED_COUNT) : SplitMode(request, startId, count)
   {
   }
   
   virtual LedMode& operator++() override
   {
-    currId++;
-    if(currId == count)
-    {
-      currId = 0;
-      growing=!growing;
-    }
+	SplitMode::operator++();
+	if(currId==0)
+	{
+	  std::swap(colors[0], colors[1]);
+	}
     return *this;
     
   }
   virtual LedMode& operator--() override
   {
-    currId--;
-    if(currId == -1)
-    {
-      currId = count-1;
-      growing=!growing;
-    }
+    SplitMode::operator--();
+	if(currId==count)
+	{
+	  std::swap(colors[0], colors[1]);
+	}
     return *this;
-  }
-  
-  virtual CRGB GetPixel(int id) const override
-  {
-    if(growing)
-      return id<=currId?color:CRGB::Black;
-    else 
-      return id<=currId?CRGB::Black:color;
   }
 };
 

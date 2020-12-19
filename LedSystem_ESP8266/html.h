@@ -13,7 +13,8 @@ const char index_html[] PROGMEM = R"rawliteral(
     <option value="simple">Simple</option>
     <option value="rainbow">Rainbow</option>
     <option value="rainbowfade">Rainbow Fade</option>
-    <option value="growing">Growing</option>
+    <option value="grow">Grow</option>
+    <option value="grownback">Grow & Back</option>
   </select><br/>
   
   <div id="colorDiv">
@@ -35,7 +36,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     function updateMode()
       {
         const mode = document.getElementById('mode').value;
-        showStuff('colorDiv', mode=='simple' || mode=='growing');
+        showStuff('colorDiv', mode=='simple' || mode=='grow' || mode=='grownback');
         showStuff('on', mode!='off');
       }
   
