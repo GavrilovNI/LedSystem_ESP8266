@@ -14,8 +14,7 @@ class LayerMode: public LedMode
 
   LayerMode(int startId = 0, int count = LED_COUNT):LedMode(startId, count)
   {
-    this->startId = startId;
-    this->count = count;
+    
   }
   
   int GetLayersCount()
@@ -62,8 +61,6 @@ class LayerMode: public LedMode
   
   virtual LedMode& operator++() override
   {
-	  
-	Serial.println("LayerMode++");
 	for(int i=0; i< layers.size(); i++)
     {
       ++(*(layers[i]));

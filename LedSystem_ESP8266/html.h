@@ -16,7 +16,10 @@ const char index_html[] PROGMEM = R"rawliteral(
     <option value="simple">Simple</option>
     <option value="rainbow">Rainbow</option>
     <option value="rainbowfade">Rainbow Fade</option>
-    <option value="grow">Grow</option>
+  </select><br/>
+
+  Mask: <select name="mask" id="mask">
+    <option value="full">Full</option>
     <option value="grownback">Grow & Back</option>
     <option value="grownback2center">Grow & Back 2 center</option>
   </select><br/>
@@ -40,7 +43,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     function updateMode()
       {
         const mode = document.getElementById('mode').value;
-        var coloredModes = ['simple', 'grow', 'grownback', 'grownback2center'];
+        var coloredModes = ['simple'];
         var showColor = false;
         coloredModes.forEach(function(item, index, array) {
           if(mode==item)
@@ -57,6 +60,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         
         const urlParams = new URLSearchParams(queryString);
         document.getElementById('mode').value = urlParams.get('mode') || 'off';
+        document.getElementById('mask').value = urlParams.get('mask') || 'full';
         document.getElementById('color').value = urlParams.get('color') || defaultColor;
         document.getElementById('brightness').value = urlParams.get('brightness') || '75';
         document.getElementById('speed').value = urlParams.get('speed') || '50';

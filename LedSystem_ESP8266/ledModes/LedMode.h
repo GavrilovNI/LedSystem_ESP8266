@@ -4,6 +4,8 @@
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
 #include "../leds.h"
+#include "../ledMasks/LedMask.h"
+#include "../ledMasks/FullMask.h"
 
 class LedMode
 {
@@ -27,19 +29,16 @@ class LedMode
 
   virtual void Update(AsyncWebServerRequest *request) { }
 
-  virtual void Draw(Leds* leds) const
+  void Draw(Leds* leds, LedMask* mask) const
   {
 	int endId = GetEndId();
-	
-    /*for(int i=startId; i < endId; i++)
-    {
-      (*leds)[i] = GetPixel(swaped ? endId-(i-startId)-1 : i);
-    }*/
 	
 	if(swaped)
 	{
 	  for(int i=0, id=startId; i < count; i++, id++)
       {
+		if(!mask->IsUnderMask(id))
+		  continue;
         (*leds)[id] = GetPixel(endId-i-1);
       }
 	}
@@ -47,10 +46,19 @@ class LedMode
 	{
 	  for(int i=startId; i < endId; i++)
       {
+		if(!mask->IsUnderMask(i))
+		  continue;
         (*leds)[i] = GetPixel(i);
       }
 	}	
   }
+  
+  virtual void Draw(Leds* leds) const
+  {
+	FullMask mask(startId, count);
+	Draw(leds, &mask);
+  }
+  
   virtual CRGB GetPixel(int id) const = 0;
 
   virtual LedMode& operator++() {}

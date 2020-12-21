@@ -16,9 +16,12 @@
 #include "ledModes/SimpleMode.h"
 #include "ledModes/RainbowMode.h"
 #include "ledModes/RainbowFadeMode.h"
-#include "ledModes/GrowMode.h"
-#include "ledModes/GrowNBackMode.h"
-#include "ledModes/GrowNBack2CenterMode.h"
+
+
+#include "ledMasks/FullMask.h"
+#include "ledMasks/SplitMask.h"
+#include "ledMasks/GrowNBackMask.h"
+#include "ledMasks/GrowNBack2CenterMask.h"
 
 #include "utils.h"
 #include "html.h"
@@ -68,9 +71,11 @@ void tryConnectToWifi()
 
 Leds* leds;
 LedMode* ledMode;
-String currMode = "off";
+LedMask* ledMask;
+String currMode;
+String currMask;
 
-int speed = 500;
+int speed = 50;
 
 
 void UpdateMode(AsyncWebServerRequest *request)
@@ -101,8 +106,7 @@ bool CreateNewMode(String mode, AsyncWebServerRequest *request)
 
   if (mode == "off")
   {
-    leds->fill(CRGB::Black);
-    leds->Show();
+    ledMode = new SimpleMode(CRGB::Black);
   }
   else if (mode == "simple")
   {
@@ -116,21 +120,41 @@ bool CreateNewMode(String mode, AsyncWebServerRequest *request)
   {
     ledMode = new RainbowFadeMode();
   }
-  else if (mode == "grow")
-  {
-    ledMode = new GrowMode(request);
-  }
-  else if (mode == "grownback")
-  {
-    ledMode = new GrowNBackMode(request);
-  }
-  else if (mode == "grownback2center")
-  {
-    ledMode = new GrowNBack2CenterMode(request);
-  }
   else
   {
     return false;
+  }
+
+  return true;
+}
+
+void UpdateMask(String mask)
+{
+  if(currMask != mask)
+  {
+    if (ledMask != nullptr)
+    {
+      delete ledMask;
+    }
+  
+    if (mask == "full")
+    {
+      ledMask = new FullMask(0, leds->GetCount());
+    }
+    else if (mask == "grownback")
+    {
+      ledMask = new GrowNBackMask(0, leds->GetCount());
+    }
+    else if (mask == "grownback2center")
+    {
+      ledMask = new GrowNBack2CenterMask(0, leds->GetCount());
+    }
+    else
+    {
+      ledMask = new FullMask(0, leds->GetCount());
+    }
+  
+    currMask=mask;
   }
 }
 
@@ -163,6 +187,11 @@ void setup()
         speed = -100;
     }
 
+    if (request->hasParam("mask"))
+    {
+      UpdateMask(request->getParam("mask")->value());
+    }
+
     UpdateMode(request);
     request->send(200, "text/html", index_html);
 
@@ -174,7 +203,7 @@ void setup()
 
   leds = new Leds();
   CreateNewMode("off", nullptr);
-  leds->Show();
+  UpdateMask("full");
 }
 
 
@@ -190,8 +219,9 @@ void loop()
 
   if (ledMode != nullptr)
   {
-
-    ledMode->Draw(leds);
+    leds->fill(CRGB::Black);
+    ledMode->Draw(leds, ledMask);
+    //ledMode->Draw(leds);
     leds->Show();
 
     if (speed == 0)
@@ -201,13 +231,16 @@ void loop()
     else if (speed > 0)
     {
       ++(*ledMode);
+      ++(*ledMask);
       delay(1000 - speed * 10 + 1);
     }
     else
     {
       --(*ledMode);
+      --(*ledMask);
       delay(1000 + speed * 10 + 1);
     }
+    Serial.println("here2");
   }
   else
   {
