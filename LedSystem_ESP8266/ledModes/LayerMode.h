@@ -48,24 +48,27 @@ class LayerMode: public LedMode
     }
   }
   
-  virtual CRGB GetPixel(int id)
+  virtual CRGB GetPixel(int id) const override
   {
 	CRGB result=CRGB::Black;
-	/*for(int i=0; i< layers.size(); i++)
+	for(int i=0; i< layers.size(); i++)
     {
-	  if(layers[i]->startId<=id && layers[i]->count>id-layers[i]->startId)
+	  if(layers[i]->GetStartId() <= id && layers[i]->GetCount() - layers[i]->GetStartId())
 		result = layers[i]->GetPixel(id);
-    }*/
+    }
 	
 	return result;
   }
   
   virtual LedMode& operator++() override
   {
+	  
+	Serial.println("LayerMode++");
 	for(int i=0; i< layers.size(); i++)
     {
       ++(*(layers[i]));
     }
+    return *this;
   }
   virtual LedMode& operator--() override
   {
@@ -73,6 +76,7 @@ class LayerMode: public LedMode
     {
       --(*(layers[i]));
     }
+    return *this;
   }
 };
 

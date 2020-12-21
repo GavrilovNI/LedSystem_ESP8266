@@ -8,8 +8,11 @@
 class SplitMode : public ColoredMode
 {
   protected:
+  
   int currId;
+	
   public:
+  
 
   SplitMode(CRGB color1, CRGB color2=CRGB::Black, int startId = 0, int count = LED_COUNT) : ColoredMode(std::vector<CRGB>{color1, color2}, startId, count)
   {

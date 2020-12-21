@@ -13,12 +13,12 @@
 #include "wifiSettings.h"
 
 #include "ledModes/LedMode.h"
-#include "ledModes/LayerMode.h"
 #include "ledModes/SimpleMode.h"
 #include "ledModes/RainbowMode.h"
 #include "ledModes/RainbowFadeMode.h"
 #include "ledModes/GrowMode.h"
 #include "ledModes/GrowNBackMode.h"
+#include "ledModes/GrowNBack2CenterMode.h"
 
 #include "utils.h"
 #include "html.h"
@@ -35,14 +35,14 @@ void notFound(AsyncWebServerRequest *request) {
 
 void connectToWifi()
 {
-  Serial.print("Connecting to "+String(ssid)+" ...");
+  Serial.print("Connecting to " + String(ssid) + " ...");
 
-  while(wifiMulti.run()!=WL_CONNECTED)
+  while (wifiMulti.run() != WL_CONNECTED)
   {
     delay(250);
     Serial.print('.');
   }
-  
+
   Serial.print("Connected. IP address: ");
   Serial.println(WiFi.localIP());
 }
@@ -50,9 +50,9 @@ void connectToWifi()
 
 void tryConnectToWifi()
 {
-  Serial.print("Connecting to "+String(ssid)+" ...");
+  Serial.print("Connecting to " + String(ssid) + " ...");
 
-  if(wifiMulti.run()==WL_CONNECTED)
+  if (wifiMulti.run() == WL_CONNECTED)
   {
     Serial.print("Connected. IP address: ");
     Serial.println(WiFi.localIP());
@@ -61,12 +61,12 @@ void tryConnectToWifi()
   {
     Serial.print("Not connected.");
   }
-  
-  
+
+
 }
 
 
-Leds leds;
+Leds* leds;
 LedMode* ledMode;
 String currMode = "off";
 
@@ -80,7 +80,7 @@ void UpdateMode(AsyncWebServerRequest *request)
     const String mode = request->getParam("mode")->value();
 
 
-    if(currMode == mode)
+    if (currMode == mode)
     {
       ledMode->Update(request);
     }
@@ -94,42 +94,46 @@ void UpdateMode(AsyncWebServerRequest *request)
 
 bool CreateNewMode(String mode, AsyncWebServerRequest *request)
 {
-  if(ledMode!=nullptr)
+  if (ledMode != nullptr)
   {
     delete ledMode;
   }
 
-  if(mode=="off")
+  if (mode == "off")
   {
-    leds.fill(CRGB::Black);
-    LEDS.show();
+    leds->fill(CRGB::Black);
+    leds->Show();
   }
-  else if(mode=="simple")
+  else if (mode == "simple")
   {
     ledMode = new SimpleMode(request);
   }
-  else if(mode=="rainbow")
+  else if (mode == "rainbow")
   {
     ledMode = new RainbowMode();
   }
-  else if(mode=="rainbowfade")
+  else if (mode == "rainbowfade")
   {
     ledMode = new RainbowFadeMode();
   }
-  else if(mode=="grow")
+  else if (mode == "grow")
   {
     ledMode = new GrowMode(request);
   }
-  
-  else if(mode=="grownback")
+  else if (mode == "grownback")
   {
     ledMode = new GrowNBackMode(request);
+  }
+  else if (mode == "grownback2center")
+  {
+    ledMode = new GrowNBack2CenterMode(request);
   }
   else
   {
     return false;
   }
 }
+
 
 void setup()
 {
@@ -140,10 +144,10 @@ void setup()
   connectToWifi();
   setupWifiBuilding();
 
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
     request->send_P(200, "text/html", index_html);
   });
-  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request)
+  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request)
   {
     if (request->hasParam("brightness"))
     {
@@ -153,10 +157,10 @@ void setup()
     if (request->hasParam("speed"))
     {
       speed = StrToInt(request->getParam("speed")->value());
-      if(speed>100)
-        speed=100;
-      if(speed<-100)
-        speed=-100;
+      if (speed > 100)
+        speed = 100;
+      if (speed < -100)
+        speed = -100;
     }
 
     UpdateMode(request);
@@ -164,41 +168,45 @@ void setup()
 
   });
 
-  
+
   server.onNotFound(notFound);
   server.begin();
+
+  leds = new Leds();
+  CreateNewMode("off", nullptr);
+  leds->Show();
 }
 
 
 
-void loop() 
+void loop()
 {
-  if(wifiMulti.run()!=WL_CONNECTED)
+  if (wifiMulti.run() != WL_CONNECTED)
   {
     tryConnectToWifi();
   }
   loopWifiBuilding();
-  
 
-  if(ledMode!=nullptr)
+
+  if (ledMode != nullptr)
   {
-    
-    ledMode->Draw(&leds);
-    leds.Show();
 
-    if (speed==0)
+    ledMode->Draw(leds);
+    leds->Show();
+
+    if (speed == 0)
     {
       delay(100);
     }
-    else if(speed>0)
+    else if (speed > 0)
     {
       ++(*ledMode);
-      delay(1000-speed*10+1);
+      delay(1000 - speed * 10 + 1);
     }
     else
     {
       --(*ledMode);
-      delay(1000+speed*10+1);
+      delay(1000 + speed * 10 + 1);
     }
   }
   else

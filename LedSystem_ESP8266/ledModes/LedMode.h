@@ -18,15 +18,38 @@ class LedMode
   }
   
   public:
+  bool swaped = false;
+  
+  int GetStartId() { return startId; }
+  int GetCount() { return count; }
+  
+  int GetEndId() const { return startId + count; }
 
   virtual void Update(AsyncWebServerRequest *request) { }
 
   virtual void Draw(Leds* leds) const
   {
-    for(int i=startId; i < count; i++)
+	int endId = GetEndId();
+	
+    /*for(int i=startId; i < endId; i++)
     {
-      (*leds)[i] = GetPixel(i);
-    }
+      (*leds)[i] = GetPixel(swaped ? endId-(i-startId)-1 : i);
+    }*/
+	
+	if(swaped)
+	{
+	  for(int i=0, id=startId; i < count; i++, id++)
+      {
+        (*leds)[id] = GetPixel(endId-i-1);
+      }
+	}
+	else
+	{
+	  for(int i=startId; i < endId; i++)
+      {
+        (*leds)[i] = GetPixel(i);
+      }
+	}	
   }
   virtual CRGB GetPixel(int id) const = 0;
 

@@ -16,6 +16,12 @@ class RainbowMode : public LedMode
   {
   }
   
+  
+  static CHSV GetRainbow(int startHue, int startId = 0, int count = 1, int id = 0)
+  {
+    return CHSV(((int)(startHue + 255.0 * (id - startId) / (count))) % 256, 255, 255);
+  }
+  
   virtual LedMode& operator++() override
   {
     hue=(hue+255)%256; //hue--
@@ -30,7 +36,7 @@ class RainbowMode : public LedMode
 
   virtual CRGB GetPixel(int id) const override
   {
-    return getRainbow(hue, count, id);
+    return RainbowMode::GetRainbow(hue, startId, count, id);
   }
 };
 

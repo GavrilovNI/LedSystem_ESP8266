@@ -15,7 +15,7 @@ class RainbowFadeMode : public RainbowMode
   
   virtual CRGB GetPixel(int id) const override
   {
-    return getRainbow(hue);
+    return RainbowMode::GetRainbow(hue);
   }
 };
 

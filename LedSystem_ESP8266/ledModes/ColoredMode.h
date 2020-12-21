@@ -54,7 +54,7 @@ class ColoredMode: public LedMode
   CRGB GetColor(int id) const { return colors[id]; }
   void SetColor(int id, CRGB value)
   {
-	if(id>colors.size())
+	if(id>=colors.size())
 	  colors.push_back(value);
 	else
 	  colors[id] = value;

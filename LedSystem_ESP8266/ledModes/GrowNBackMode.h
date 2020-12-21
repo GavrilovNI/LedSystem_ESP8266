@@ -3,7 +3,9 @@
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
+#include <algorithm>
 #include "GrowMode.h"
+#include "../utils.h"
 
 class GrowNBackMode : public GrowMode
 {
@@ -21,44 +23,60 @@ class GrowNBackMode : public GrowMode
   
   virtual LedMode& operator++() override
   {
+	int endId = GetEndId();
+	  
 	if(growing)
 	{
-	  currId++;
-	  if(currId>count)
+	  if(currId >= endId)
 	  {
-        currId=count-1;
-		growing=!growing;
+		currId = endId-1;
+		growing = !growing;
+	  }
+	  else
+	  {
+	    currId++;
 	  }
 	}
 	else
 	{
-	  currId--;
-	  if(currId<0)
+	  if(currId <= startId)
 	  {
-        currId=1;
-		growing=!growing;
+		currId = startId + 1;
+		growing = !growing;
+	  }
+	  else
+	  {
+	    currId--;
 	  }
 	}
     return *this;
   }
   virtual LedMode& operator--() override
   {
+	int endId = GetEndId();
+	
     if(!growing)
 	{
-	  currId++;
-	  if(currId>count)
+	  if(currId >= endId)
 	  {
-        currId=count-1;
-		growing=!growing;
+		currId = endId-1;
+		growing = !growing;
+	  }
+	  else
+	  {
+	    currId++;
 	  }
 	}
 	else
 	{
-	  currId--;
-	  if(currId<0)
+	  if(currId <= startId)
 	  {
-        currId=1;
-		growing=!growing;
+		currId = startId + 1;
+		growing = !growing;
+	  }
+	  else
+	  {
+	    currId--;
 	  }
 	}
     return *this;

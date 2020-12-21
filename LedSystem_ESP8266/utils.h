@@ -19,4 +19,10 @@ int htmlColorToInt(String color)
 }
 
 
+String CRGB2Str(CRGB color)
+{
+  return "("+String(color.r)+", "+String(color.g)+", "+String(color.b)+")";
+}
+
+
 #endif // UTILS_H
