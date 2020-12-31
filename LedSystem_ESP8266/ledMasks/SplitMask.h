@@ -3,20 +3,13 @@
 
 #include <cmath>
 #include "LedMask.h"
+#include "../utils.h"
 
 class SplitMask : public LedMask
 {
   protected:
   float currId;
   
-  
-  virtual bool IsMasked(int id) const override
-  {
-	//Serial.print("id: "+String(id));
-	//Serial.println(" currId: "+String(currId));
-	  
-	return id<currId;
-  }
   
   virtual uint32_t GetMaskLocal(int id) const override
   {
@@ -33,16 +26,12 @@ class SplitMask : public LedMask
   public:
   SplitMask(float startId = 0, float count = LED_COUNT) : LedMask(startId, count)
   {
-    currId = startId;
+    SetCurrId(startId);
   }
   
-  void SetCurrId(int id)
+  void SetCurrId(int value)
   {
-    currId=id;
-    if(currId<startId)
-	  currId=startId;
-	else if(currId>GetEndId())
-	  currId=GetEndId();
+    currId = clamp(value, startId, count);
   }
   
   int GetCurrId() { return currId; }

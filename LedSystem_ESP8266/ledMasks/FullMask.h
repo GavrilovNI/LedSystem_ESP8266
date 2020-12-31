@@ -11,11 +11,6 @@ class FullMask : public LedMask
 	return 255;
   }
   
-  virtual bool IsMasked(int id) const override
-  {
-	return true;
-  }
-	
   public:
   FullMask(float startId = 0, float count = LED_COUNT) : LedMask(startId, count)
   {

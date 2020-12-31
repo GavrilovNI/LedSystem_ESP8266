@@ -11,18 +11,6 @@ class LayerMask: public LedMask
   protected:
   std::vector<LedMask*> layers;
   
-  virtual bool IsMasked(int id) const override
-  {
-	  //Serial.println("ismasked ");
-	for(int i=0; i< layers.size(); i++)
-    {
-	  //Serial.println("id: "+String(id)+" i: "+String(i)+" "+String(layers[i]->IsUnderMask(id)));
-	  if(layers[i]->IsUnderMask(id))
-		return true;
-    }
-	return false;
-  }
-  
   virtual uint32_t GetMaskLocal(int id) const override
   {
 	uint32_t result=0;

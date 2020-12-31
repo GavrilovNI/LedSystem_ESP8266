@@ -15,8 +15,6 @@ class LedMask
 		this->startId = startId;
 		this->count = count;
 	}
-	virtual bool IsMasked(int id) const = 0;
-	
 	virtual uint32_t GetMaskLocal(int id) const = 0;
 
 	public:
@@ -28,16 +26,6 @@ class LedMask
 
 	float GetEndId() const { return startId + count; }
 
-	bool IsUnderMask(int id)
-	{
-		if(id<startId)
-			return false;
-		if(id>=GetEndId())
-			return false;
-		  
-		return IsMasked(swaped?GetEndId()-(id-startId)-1:id);
-	}
-	
 	uint32_t GetMask(int id)
 	{
 		if(id<startId || id>=GetEndId())

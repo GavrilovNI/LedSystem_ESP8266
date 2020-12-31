@@ -24,5 +24,14 @@ String CRGB2Str(CRGB color)
   return "("+String(color.r)+", "+String(color.g)+", "+String(color.b)+")";
 }
 
+int clamp(int value, int _min, int _max)
+{
+  if(value < _min)
+    return _min;
+  if(value > _max)
+    return _max;
+  return value;
+}
+
 
 #endif // UTILS_H

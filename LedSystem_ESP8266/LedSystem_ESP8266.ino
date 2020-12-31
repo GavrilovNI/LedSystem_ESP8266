@@ -22,6 +22,7 @@
 #include "ledMasks/SplitMask.h"
 #include "ledMasks/GrowNBackMask.h"
 #include "ledMasks/GrowNBack2CenterMask.h"
+#include "ledMasks/RunnerMask.h"
 
 #include "utils.h"
 #include "html.h"
@@ -153,6 +154,10 @@ void UpdateMask(String mask)
     {
       ledMask = new GrowNBack2CenterMask(0, leds->GetCount());
     }
+    else if (mask == "runner")
+    {
+      ledMask = new RunnerMask(5, 1, 0, leds->GetCount());
+    }
     else
     {
       ledMask = new FullMask(0, leds->GetCount());
@@ -162,14 +167,7 @@ void UpdateMask(String mask)
   }
 }
 
-int clamp(int value, int _min, int _max)
-{
-  if(value < _min)
-    return _min;
-  if(value > _max)
-    return _max;
-  return value;
-}
+
 
 void setup()
 {

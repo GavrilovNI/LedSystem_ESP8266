@@ -29,30 +29,6 @@ class LedMode
 
   virtual void Update(AsyncWebServerRequest *request) { }
 
-  /*void Draw(Leds* leds, LedMask* mask) const
-  {
-	int endId = GetEndId();
-	
-	if(swaped)
-	{
-	  for(int i=0, id=startId; i < count; i++, id++)
-      {
-		if(!mask->IsUnderMask(id))
-		  continue;
-        (*leds)[id] = GetPixel(endId-i-1);
-      }
-	}
-	else
-	{
-	  for(int i=startId; i < endId; i++)
-      {
-		if(!mask->IsUnderMask(i))
-		  continue;
-        (*leds)[i] = GetPixel(i);
-      }
-	}	
-  }*/
-  
   void Draw(Leds* leds, LedMask* mask) const
   {
 	int endId = GetEndId();

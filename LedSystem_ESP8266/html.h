@@ -33,6 +33,7 @@ const char index_html[] PROGMEM = R"rawliteral(
       <option value="full">Full</option>
       <option value="grownback">Grow & Back</option>
       <option value="grownback2center">Grow & Back 2 center</option>
+      <option value="runner">Runner</option>
     </select><br/>
     
     <div id="mask_settings">

@@ -28,7 +28,7 @@ class RainbowMode : public LedMode
   {
 	hue = fmod(hue - value, 256);
 	if(hue < 0)
-		hue = 255 + hue;
+		hue = 256 + hue;
   }
 
   virtual CRGB GetPixel(int id) const override
