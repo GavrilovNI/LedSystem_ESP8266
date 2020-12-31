@@ -1,15 +1,37 @@
 #ifndef SPLIT_MASK_H
 #define SPLIT_MASK_H
 
+#include <cmath>
 #include "LedMask.h"
 
 class SplitMask : public LedMask
 {
   protected:
-  int currId;
+  float currId;
+  
+  
+  virtual bool IsMasked(int id) const override
+  {
+	//Serial.print("id: "+String(id));
+	//Serial.println(" currId: "+String(currId));
+	  
+	return id<currId;
+  }
+  
+  virtual uint32_t GetMaskLocal(int id) const override
+  {
+	if(id >= currId)
+		return 0;
+	
+	if(id < floor(currId)) 
+	  return 255;
+	  
+	return (uint32_t)((currId - id)*255);
+  }
+  
 	
   public:
-  SplitMask(int startId = 0, int count = LED_COUNT) : LedMask(startId, count)
+  SplitMask(float startId = 0, float count = LED_COUNT) : LedMask(startId, count)
   {
     currId = startId;
   }
@@ -26,28 +48,17 @@ class SplitMask : public LedMask
   int GetCurrId() { return currId; }
   
   
-  virtual bool IsMasked(int id) const override
+  
+  virtual LedMask& operator+=(const float& value) override
   {
-	//Serial.print("id: "+String(id));
-	//Serial.println(" currId: "+String(currId));
-	  
-	return id<currId;
-  }
-
-  virtual LedMask& operator++() override
-  {
-	if(currId >= GetEndId())
-	  currId = startId;
-	else
-	  currId++;
-    return *this;
-  }
-  virtual LedMask& operator--() override
-  {
-	if(currId <= startId)
-	  currId = GetEndId();
-	else
-	  currId--;
+	currId+=value;
+	
+	while(currId > GetEndId())
+		currId -= GetCount();
+	
+	while(currId < GetStartId())
+		currId += GetCount();
+	
     return *this;
   }
 };

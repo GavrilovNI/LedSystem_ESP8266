@@ -75,7 +75,8 @@ LedMask* ledMask;
 String currMode;
 String currMask;
 
-int speed = 50;
+float modeSpeed = 50;
+float maskSpeed = 50;
 
 
 void UpdateMode(AsyncWebServerRequest *request)
@@ -158,6 +159,14 @@ void UpdateMask(String mask)
   }
 }
 
+int clamp(int value, int _min, int _max)
+{
+  if(value < _min)
+    return _min;
+  if(value > _max)
+    return _max;
+  return value;
+}
 
 void setup()
 {
@@ -178,21 +187,28 @@ void setup()
       const int brightness = request->getParam("brightness")->value().toInt();
       LEDS.setBrightness(brightness);
     }
-    if (request->hasParam("speed"))
+
+    if (request->hasParam("mode_speed"))
     {
-      speed = StrToInt(request->getParam("speed")->value());
-      if (speed > 100)
-        speed = 100;
-      if (speed < -100)
-        speed = -100;
+      modeSpeed = clamp(request->getParam("mode_speed")->value().toInt(), 0, 100);
+      if(request->hasParam("mode_inverted") && request->getParam("mode_inverted")->value()=="on")
+        modeSpeed = -modeSpeed;
     }
+    if (request->hasParam("mask_speed"))
+    {
+      maskSpeed = clamp(request->getParam("mask_speed")->value().toInt(), 0, 100);
+      if(request->hasParam("mask_inverted") && request->getParam("mask_inverted")->value()=="on")
+        maskSpeed = -maskSpeed;
+    }
+      
 
     if (request->hasParam("mask"))
     {
       UpdateMask(request->getParam("mask")->value());
     }
-
     UpdateMode(request);
+
+    
     request->send(200, "text/html", index_html);
 
   });
@@ -206,7 +222,7 @@ void setup()
   UpdateMask("full");
 }
 
-
+const int updatePeriod = 20; // in ms
 
 void loop()
 {
@@ -224,28 +240,10 @@ void loop()
     //ledMode->Draw(leds);
     leds->Show();
 
-    if (speed == 0)
-    {
-      delay(100);
-    }
-    else if (speed > 0)
-    {
-      ++(*ledMode);
-      ++(*ledMask);
-      delay(1000 - speed * 10 + 1);
-    }
-    else
-    {
-      --(*ledMode);
-      --(*ledMask);
-      delay(1000 + speed * 10 + 1);
-    }
-    Serial.println("here2");
+    (*ledMode) += modeSpeed*updatePeriod/1000;
+    (*ledMask) += maskSpeed*updatePeriod/1000;
   }
-  else
-  {
-    delay(100);
-  }
+  delay(updatePeriod);
 }
 
 #endif // LED_SYSTEM_ESP8266_INO

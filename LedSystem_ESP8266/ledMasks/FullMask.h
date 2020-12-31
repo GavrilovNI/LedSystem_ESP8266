@@ -5,16 +5,24 @@
 
 class FullMask : public LedMask
 {
-  public:
-  FullMask(int startId = 0, int count = LED_COUNT) : LedMask(startId, count)
+  protected:
+  virtual uint32_t GetMaskLocal(int id) const override
   {
-	  
+	return 255;
   }
   
   virtual bool IsMasked(int id) const override
   {
 	return true;
   }
+	
+  public:
+  FullMask(float startId = 0, float count = LED_COUNT) : LedMask(startId, count)
+  {
+	  
+  }
+  
+  
 };
 
 

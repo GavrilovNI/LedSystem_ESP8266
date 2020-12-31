@@ -10,10 +10,14 @@ class GrowNBack2CenterMask : public LayerMask
   public:
   
   
-  GrowNBack2CenterMask(int startId = 0, int count = LED_COUNT) : LayerMask(startId, count)
+  GrowNBack2CenterMask(float startId = 0, float count = LED_COUNT) : LayerMask(startId, count)
   {
-    GrowNBackMask* gnb0 = new GrowNBackMask(startId, count/2+count%2);
-	GrowNBackMask* gnb1 = new GrowNBackMask(startId+count/2, count/2+count%2);
+    /*GrowNBackMask* gnb0 = new GrowNBackMask(startId, count/2+count%2);
+	GrowNBackMask* gnb1 = new GrowNBackMask(startId+count/2, count/2+count%2);*/
+	
+	GrowNBackMask* gnb0 = new GrowNBackMask(startId, count/2);
+	GrowNBackMask* gnb1 = new GrowNBackMask(startId+count/2, count/2);
+	
 	gnb0->swaped=!gnb1->swaped;
 	AddLayer(gnb0);
 	AddLayer(gnb1);

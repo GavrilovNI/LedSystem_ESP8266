@@ -29,7 +29,7 @@ class LedMode
 
   virtual void Update(AsyncWebServerRequest *request) { }
 
-  void Draw(Leds* leds, LedMask* mask) const
+  /*void Draw(Leds* leds, LedMask* mask) const
   {
 	int endId = GetEndId();
 	
@@ -51,6 +51,27 @@ class LedMode
         (*leds)[i] = GetPixel(i);
       }
 	}	
+  }*/
+  
+  void Draw(Leds* leds, LedMask* mask) const
+  {
+	int endId = GetEndId();
+	
+	
+	if(swaped)
+	{
+	  for(int i=0, id=startId; i < count; i++, id++)
+      {
+        (*leds)[id] = GetPixel(endId-i-1).fadeToBlackBy(255 - mask->GetMask(id));
+      }
+	}
+	else
+	{
+	  for(int i=startId; i < endId; i++)
+      {
+        (*leds)[i] = GetPixel(i).fadeToBlackBy(255 - mask->GetMask(i));
+      }
+	}	
   }
   
   virtual void Draw(Leds* leds) const
@@ -61,8 +82,7 @@ class LedMode
   
   virtual CRGB GetPixel(int id) const = 0;
 
-  virtual LedMode& operator++() {}
-  virtual LedMode& operator--() {};
+  virtual LedMode& operator+= (const float& value) {}
 };
 
 

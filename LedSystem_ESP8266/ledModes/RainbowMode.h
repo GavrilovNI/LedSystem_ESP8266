@@ -3,12 +3,13 @@
 
 #include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
+#include <cmath>
 #include "LedMode.h"
 
 class RainbowMode : public LedMode
 {
   protected:
-  int hue=0;
+  float hue=0;
   
   public:
 
@@ -17,21 +18,17 @@ class RainbowMode : public LedMode
   }
   
   
-  static CHSV GetRainbow(int startHue, int startId = 0, int count = 1, int id = 0)
+  static CHSV GetRainbow(float startHue, int startId = 0, int count = 1, int id = 0)
   {
     return CHSV(((int)(startHue + 255.0 * (id - startId) / (count))) % 256, 255, 255);
   }
   
-  virtual LedMode& operator++() override
+  
+  virtual LedMode& operator+= (const float& value) override
   {
-    hue=(hue+255)%256; //hue--
-    return *this;
-    
-  }
-  virtual LedMode& operator--() override
-  {
-    hue=(hue+1)%256; //hue++
-    return *this;
+	hue = fmod(hue - value, 256);
+	if(hue < 0)
+		hue = 255 + hue;
   }
 
   virtual CRGB GetPixel(int id) const override

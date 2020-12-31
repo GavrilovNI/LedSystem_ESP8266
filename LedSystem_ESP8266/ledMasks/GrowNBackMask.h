@@ -1,6 +1,8 @@
 #ifndef GROW_N_BACK_MASK_H
 #define GROW_N_BACK_MASK_H
 
+#include <cmath>
+#include <algorithm>
 #include "SplitMask.h"
 
 class GrowNBackMask : public SplitMask
@@ -11,74 +13,66 @@ class GrowNBackMask : public SplitMask
   bool growing=true;
   
   
-  GrowNBackMask(int startId = 0, int count = LED_COUNT) : SplitMask(startId, count)
+  GrowNBackMask(float startId = 0, float count = LED_COUNT) : SplitMask(startId, count)
   {
     
   }
   
-  virtual LedMask& operator++() override
+  
+  virtual LedMask& operator+=(const float& value) override
   {
-	const int endId = GetEndId();
+	float lValue=value;
 	
-	  
-	if(growing)
+	bool g;
+	if(value>0)
 	{
-	  if(currId >= endId)
-	  {
-		currId = endId-1;
-		growing = !growing;
-	  }
-	  else
-	  {
-	    currId++;
-	  }
+		g = growing;
 	}
 	else
 	{
-	  if(currId <= startId)
-	  {
-		currId = startId + 1;
-		growing = !growing;
-	  }
-	  else
-	  {
-	    currId--;
-	  }
+		g = !growing;
+		lValue = -lValue;
+	}	
+	
+	
+	while(lValue!=0)
+	{
+		float _max, _min;
+		float _sign;
+		if(g)
+		{
+			_max = GetEndId();
+			_min = currId;
+			_sign = 1;
+		}
+		else
+		{
+			_max = currId;
+			_min = GetStartId();
+			_sign = -1;
+		}	
+		
+		float _diff = _max - _min;
+		
+		if(lValue >= _diff)
+		{
+			lValue -= _diff;
+			currId += _sign * _diff;
+			g = !g;
+		}
+		else
+		{
+			currId += _sign * lValue;
+			lValue = 0;
+		}	
 	}
+	
+	growing = value > 0 ? g : !g;
 	
     return *this;
   }
   
-  virtual LedMask& operator--() override
-  {
-	int endId = GetEndId();
-	  
-	if(!growing)
-	{
-	  if(currId >= endId)
-	  {
-		currId = endId-1;
-		growing = !growing;
-	  }
-	  else
-	  {
-	    currId++;
-	  }
-	}
-	else
-	{
-	  if(currId <= startId)
-	  {
-		currId = startId + 1;
-		growing = !growing;
-	  }
-	  else
-	  {
-	    currId--;
-	  }
-	}
-    return *this;
-  }
+  
 };
 
 
