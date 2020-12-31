@@ -21,7 +21,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     
     <div id="mode_settings">
       Speed: <input type="range" name="mode_speed" id="mode_speed" min="0" max="100" value="50"
-              onchange="updateSpeedLabel(this)" oninput="updateSpeedLabel(this)">
+              onchange="updateLabel(this)" oninput="updateLabel(this)">
       <label id = "label_mode_speed">50</label><br/>
       Inverted: <input type="checkbox" name="mode_inverted" id="mode_inverted"><br/>
     </div>
@@ -37,7 +37,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     
     <div id="mask_settings">
       Speed: <input type="range" name="mask_speed" id="mask_speed" min="0" max="100" value="50"
-              onchange="updateSpeedLabel(this)" oninput="updateSpeedLabel(this)">
+              onchange="updateLabel(this)" oninput="updateLabel(this)">
       <label id = "label_mask_speed">50</label><br/>
       Inverted: <input type="checkbox" name="mask_inverted" id="mask_inverted"><br/>
     </div>
@@ -47,17 +47,20 @@ const char index_html[] PROGMEM = R"rawliteral(
   
   <div id="settings">
   <br/>
-  <div id="colorDiv">
-    Color: <input type="color" id="color" name="color" value="#e66465"><br/>
-  </div>
+    <div id="colorDiv">
+      Color: <input type="color" id="color" name="color" value="#e66465"><br/>
+    </div>
     Brightness: <input type="range" name="brightness"  id="brightness" min="0" max="255" value="75"><br/>
+    Update period(ms): <input type="range" name="update_period"  id="update_period" min="1" max="1000" value="20"
+              onchange="updateLabel(this)" oninput="updateLabel(this)">
+    <label id = "label_update_period">20</label><br/>
   </div>
   
   <input type="submit" value="Set"><br/>
 
   <script type="text/javascript">
 
-    function updateSpeedLabel(element)
+    function updateLabel(element)
     {
       document.getElementById('label_'+element.id).innerHTML = element.value;
     }
@@ -106,8 +109,13 @@ const char index_html[] PROGMEM = R"rawliteral(
       setValueFromUrlParams('brightness', '75');
       setValueFromUrlParams('mode_speed', '50');
       setValueFromUrlParams('mask_speed', '50');
+      setValueFromUrlParams('update_period', '20');
       setCheckedFromUrlParams('mode_inverted', false);
       setCheckedFromUrlParams('mask_inverted', false);
+
+      updateLabel(document.getElementById('mode_speed'));
+      updateLabel(document.getElementById('mask_speed'));
+      updateLabel(document.getElementById('update_period'));
       
       updateMode();
     }

@@ -78,6 +78,9 @@ String currMask;
 float modeSpeed = 50;
 float maskSpeed = 50;
 
+float updatePeriod = 20; // in ms
+
+
 
 void UpdateMode(AsyncWebServerRequest *request)
 {
@@ -187,6 +190,10 @@ void setup()
       const int brightness = request->getParam("brightness")->value().toInt();
       LEDS.setBrightness(brightness);
     }
+    if (request->hasParam("update_period"))
+    {
+      updatePeriod = clamp(request->getParam("update_period")->value().toInt(), 1, 1000);
+    }
 
     if (request->hasParam("mode_speed"))
     {
@@ -221,8 +228,6 @@ void setup()
   CreateNewMode("off", nullptr);
   UpdateMask("full");
 }
-
-const int updatePeriod = 20; // in ms
 
 void loop()
 {
