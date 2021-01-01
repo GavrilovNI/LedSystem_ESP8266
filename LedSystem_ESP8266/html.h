@@ -8,8 +8,7 @@ const char index_html[] PROGMEM = R"rawliteral(
   <title>Kitchen Led</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
-  <form action="/get">
-    
+  <form action = "/get" onsubmit="onSubmit();">
 
   <div id="div_mode">
     Mode: <select name="mode" id="mode" onchange="updateMode(); return false;">
@@ -20,10 +19,14 @@ const char index_html[] PROGMEM = R"rawliteral(
     </select><br/>
     
     <div id="mode_settings">
+    <div id="colorDiv">
+    Color: <input type="color" id="color" name="color" value="#e66465"><br/>
+    </div>
       Speed: <input type="range" name="mode_speed" id="mode_speed" min="0" max="100" value="50"
-              onchange="updateLabel(this)" oninput="updateLabel(this)">
+              onchange="updateSpeedLabel(this)" oninput="updateSpeedLabel(this)">
       <label id = "label_mode_speed">50</label><br/>
-      Inverted: <input type="checkbox" name="mode_inverted" id="mode_inverted"><br/>
+      Inverted: <input type="checkbox" name="mode_inverted" id="mode_inverted" value = '1'><br/>
+    <input type='hidden' name='mode_inverted' id='mode_inverted_hidden' value='0' >
     </div>
   </div>
 
@@ -33,35 +36,32 @@ const char index_html[] PROGMEM = R"rawliteral(
       <option value="full">Full</option>
       <option value="grownback">Grow & Back</option>
       <option value="grownback2center">Grow & Back 2 center</option>
-      <option value="runner">Runner</option>
     </select><br/>
     
     <div id="mask_settings">
       Speed: <input type="range" name="mask_speed" id="mask_speed" min="0" max="100" value="50"
-              onchange="updateLabel(this)" oninput="updateLabel(this)">
+              onchange="updateSpeedLabel(this)" oninput="updateSpeedLabel(this)">
       <label id = "label_mask_speed">50</label><br/>
-      Inverted: <input type="checkbox" name="mask_inverted" id="mask_inverted"><br/>
+      Inverted: <input type="checkbox" name="mask_inverted" id="mask_inverted" value='1'><br/>
+    <input type='hidden' name='mask_inverted' id='mask_inverted_hidden' value='0' >
     </div>
   </div>
-  
-  
   
   <div id="settings">
   <br/>
-    <div id="colorDiv">
-      Color: <input type="color" id="color" name="color" value="#e66465"><br/>
-    </div>
     Brightness: <input type="range" name="brightness"  id="brightness" min="0" max="255" value="75"><br/>
-    Update period(ms): <input type="range" name="update_period"  id="update_period" min="1" max="1000" value="20"
-              onchange="updateLabel(this)" oninput="updateLabel(this)">
-    <label id = "label_update_period">20</label><br/>
   </div>
   
   <input type="submit" value="Set"><br/>
-
+  
   <script type="text/javascript">
 
-    function updateLabel(element)
+    function onSubmit()
+    {
+      document.getElementById('mode_inverted_hidden').disabled = document.getElementById("mode_inverted").checked;
+    }
+
+    function updateSpeedLabel(element)
     {
       document.getElementById('label_'+element.id).innerHTML = element.value;
     }
@@ -95,9 +95,10 @@ const char index_html[] PROGMEM = R"rawliteral(
       document.getElementById(id).value = urlParams.get(id) || def;
     }
   
-  function setCheckedFromUrlParams(id, def)
+    function setCheckedFromUrlParams(id, def)
     {
-      document.getElementById(id).checked = urlParams.get(id) && urlParams.get(id)=='on' || def;
+      let element = document.getElementById(id);
+      element.checked = urlParams.get(id) && urlParams.get(id) == element.value || def;
     }
   
     function load()
@@ -110,18 +111,11 @@ const char index_html[] PROGMEM = R"rawliteral(
       setValueFromUrlParams('brightness', '75');
       setValueFromUrlParams('mode_speed', '50');
       setValueFromUrlParams('mask_speed', '50');
-      setValueFromUrlParams('update_period', '20');
       setCheckedFromUrlParams('mode_inverted', false);
       setCheckedFromUrlParams('mask_inverted', false);
-
-      updateLabel(document.getElementById('mode_speed'));
-      updateLabel(document.getElementById('mask_speed'));
-      updateLabel(document.getElementById('update_period'));
       
       updateMode();
     }
-
-  
     
     window.onload = load;
   </script>

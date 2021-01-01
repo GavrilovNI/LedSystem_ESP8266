@@ -1,8 +1,8 @@
 #ifndef LED_MODE_H
 #define LED_MODE_H
 
-#include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
+#include <map>
 #include "../leds.h"
 #include "../ledMasks/LedMask.h"
 #include "../ledMasks/FullMask.h"
@@ -27,7 +27,7 @@ class LedMode
   
   int GetEndId() const { return startId + count; }
 
-  virtual void Update(AsyncWebServerRequest *request) { }
+  virtual void Update(const std::map<String, String>* args) { }
 
   void Draw(Leds* leds, LedMask* mask) const
   {

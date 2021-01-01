@@ -1,7 +1,6 @@
 #ifndef COLORED_MODE_H
 #define COLORED_MODE_H
 
-#include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
 #include <vector>
 #include "LedMode.h"
@@ -21,32 +20,27 @@ class ColoredMode: public LedMode
   {
     this->colors = colors;
   }
-  ColoredMode(AsyncWebServerRequest *request, int startId = 0, int count = LED_COUNT) : LedMode(startId, count)
+  ColoredMode(const std::map<String, String>* args, int startId = 0, int count = LED_COUNT) : LedMode(startId, count)
   {
-    this->Update(request);
+    this->Update(args);
   }
 
-  virtual void Update(AsyncWebServerRequest *request) override
+  virtual void Update(const std::map<String, String>* args) override
   {
-	colors.clear();
-    if (request->hasParam("color"))
-    {
-      colors.push_back(CRGB(htmlColorToInt(request->getParam("color")->value())));
-    }
-	else if (request->hasParam("color0"))
-    {
-      colors.push_back(CRGB(htmlColorToInt(request->getParam("color0")->value())));
-	  
-	  
-	  int num = 1;
-	  String paramName = "color"+String(num);
-	  while(request->hasParam(paramName))
-	  {
-	    colors.push_back(CRGB(htmlColorToInt(request->getParam(paramName)->value())));
-		paramName = "color"+String(++num);
-	  }
-    }
-	
+	for(auto it = args->begin(); it != args->end(); it++)
+	{
+		String key = it->first;
+		if(key.length() >= 5 && key.substring(0, 5) == "color")
+		{
+			int num = key.length() > 5 ? key.substring(5).toInt() : 0;
+			
+			while(num >= colors.size())
+			{
+				colors.push_back(CRGB::Black);
+			}
+			colors[num] = CRGB(htmlColorToInt(it->second));
+		}
+	}
   }
   
   

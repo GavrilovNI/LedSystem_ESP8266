@@ -1,7 +1,6 @@
 #ifndef RAINBOW_MODE_H
 #define RAINBOW_MODE_H
 
-#include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
 #include <cmath>
 #include "LedMode.h"

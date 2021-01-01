@@ -1,6 +1,9 @@
 #ifndef LED_SYSTEM_ESP8266_INO
 #define LED_SYSTEM_ESP8266_INO
 
+
+#include <map>
+
 #include <ArduinoOTA.h>
 #include <ESP8266WiFi.h>
 
@@ -77,29 +80,33 @@ String currMask;
 float modeSpeed = 50;
 float maskSpeed = 50;
 
+bool modeInverted = false;
+bool maskInverted = false;
+
 float updatePeriod = 20; // in ms
 unsigned long timeBeforeDelay;
 
-void UpdateMode(AsyncWebServerRequest *request)
+void UpdateMode(const std::map<String, String>* args)
 {
-  if (request->hasParam("mode"))
+  auto modeIt = args->find("mode");
+  if (modeIt != args->end())
   {
-    const String mode = request->getParam("mode")->value();
+    const String mode = modeIt->second;
 
 
     if (currMode == mode)
     {
-      ledMode->Update(request);
+      ledMode->Update(args);
     }
     else
     {
-      CreateNewMode(mode, request);
+      CreateNewMode(mode, args);
       currMode = mode;
     }
   }
 }
 
-bool CreateNewMode(String mode, AsyncWebServerRequest *request)
+bool CreateNewMode(String mode, const std::map<String, String>* args)
 {
   if (ledMode != nullptr)
   {
@@ -112,7 +119,7 @@ bool CreateNewMode(String mode, AsyncWebServerRequest *request)
   }
   else if (mode == "simple")
   {
-    ledMode = new SimpleMode(request);
+    ledMode = new SimpleMode(args);
   }
   else if (mode == "rainbow")
   {
@@ -177,40 +184,50 @@ void setup()
   }
   setupWifiBuilding();
 
+  
+
   server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
     request->send_P(200, "text/html", index_html);
   });
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request)
   {
-    if (request->hasParam("brightness"))
+    auto args = getRequestArgs(request);
+
+    for(auto it = args.begin(); it != args.end(); it++)
     {
-      const int brightness = request->getParam("brightness")->value().toInt();
-      LEDS.setBrightness(brightness);
-    }
-    if (request->hasParam("update_period"))
-    {
-      updatePeriod = clamp(request->getParam("update_period")->value().toInt(), 1, 1000);
+      String key = it->first;
+      String value = it->second;
+      if(key == "brightness")
+      {
+        LEDS.setBrightness(clamp(value.toInt(), 0, 255));
+      }
+      else if(key == "update_period")
+      {
+        updatePeriod = clamp(value.toInt(), 1, 1000);
+      }
+      else if(key == "mode_speed")
+      {
+        modeSpeed = clamp(value.toInt(), 0, 100);
+      }
+      else if(key == "mode_inverted")
+      {
+        modeInverted = value == "1";
+      }
+      else if(key == "mask_speed")
+      {
+        maskSpeed = clamp(value.toInt(), 0, 100);
+      }
+      else if(key == "mask_inverted")
+      {
+        maskInverted = value == "1";
+      }
+      else if(key == "mask")
+      {
+        UpdateMask(value);
+      }
     }
 
-    if (request->hasParam("mode_speed"))
-    {
-      modeSpeed = clamp(request->getParam("mode_speed")->value().toInt(), 0, 100);
-      if(request->hasParam("mode_inverted") && request->getParam("mode_inverted")->value()=="on")
-        modeSpeed = -modeSpeed;
-    }
-    if (request->hasParam("mask_speed"))
-    {
-      maskSpeed = clamp(request->getParam("mask_speed")->value().toInt(), 0, 100);
-      if(request->hasParam("mask_inverted") && request->getParam("mask_inverted")->value()=="on")
-        maskSpeed = -maskSpeed;
-    }
-      
-
-    if (request->hasParam("mask"))
-    {
-      UpdateMask(request->getParam("mask")->value());
-    }
-    UpdateMode(request);
+    UpdateMode(&args);
 
     
     request->send(200, "text/html", index_html);
@@ -244,8 +261,13 @@ void loop()
     leds->Show();
 
     unsigned long realTime = millis() - timeBeforeDelay;
-    (*ledMode) += modeSpeed*realTime/1000;
-    (*ledMask) += maskSpeed*realTime/1000;
+
+    float modeDelta = modeSpeed * realTime / 1000;
+    float maskDelta = maskSpeed * realTime / 1000;
+
+    
+    (*ledMode) += modeInverted ? -modeDelta : modeDelta;
+    (*ledMask) += maskInverted ? -maskDelta : maskDelta;
   }
   timeBeforeDelay = millis();
 

@@ -1,7 +1,6 @@
 #ifndef SIMPLE_MODE_H
 #define SIMPLE_MODE_H
 
-#include <ESPAsyncWebServer.h>
 #include <pixeltypes.h>
 #include "ColoredMode.h"
 
@@ -12,7 +11,7 @@ class SimpleMode : public ColoredMode
   SimpleMode(CRGB color, int startId = 0, int count = LED_COUNT) : ColoredMode(color, startId, count)
   {
   }
-  SimpleMode(AsyncWebServerRequest *request, int startId = 0, int count = LED_COUNT) : ColoredMode(request, startId, count)
+  SimpleMode(const std::map<String, String>* args, int startId = 0, int count = LED_COUNT) : ColoredMode(args, startId, count)
   {
   }
 
