@@ -80,8 +80,7 @@ float modeSpeed = 50;
 float maskSpeed = 50;
 
 float updatePeriod = 20; // in ms
-
-
+unsigned long timeBeforeDelay;
 
 void UpdateMode(AsyncWebServerRequest *request)
 {
@@ -167,8 +166,6 @@ void UpdateMask(String mask)
   }
 }
 
-
-
 void setup()
 {
   Serial.begin(115200);
@@ -225,7 +222,11 @@ void setup()
   leds = new Leds();
   CreateNewMode("off", nullptr);
   UpdateMask("full");
+
+  timeBeforeDelay = millis();
 }
+
+
 
 void loop()
 {
@@ -243,9 +244,12 @@ void loop()
     //ledMode->Draw(leds);
     leds->Show();
 
-    (*ledMode) += modeSpeed*updatePeriod/1000;
-    (*ledMask) += maskSpeed*updatePeriod/1000;
+    unsigned long realTime = millis() - timeBeforeDelay;
+    (*ledMode) += modeSpeed*realTime/1000;
+    (*ledMask) += maskSpeed*realTime/1000;
   }
+  timeBeforeDelay = millis();
+
   delay(updatePeriod);
 }
 
