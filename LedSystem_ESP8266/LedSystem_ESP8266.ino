@@ -146,7 +146,6 @@ void UpdateMode(const std::map<String, String>* args)
   {
     const String mode = modeIt->second;
 
-
     if (currMode == mode)
     {
       ledMode->Update(args);
@@ -154,8 +153,11 @@ void UpdateMode(const std::map<String, String>* args)
     else
     {
       CreateNewMode(mode, args);
-      currMode = mode;
     }
+  }
+  else if(currMode != "off")
+  {
+    ledMode->Update(args);
   }
 }
 
@@ -165,7 +167,7 @@ bool CreateNewMode(String mode, const std::map<String, String>* args)
   {
     delete ledMode;
   }
-
+  
   if (mode == "off")
   {
     ledMode = new SimpleMode(CRGB::Black);
@@ -186,6 +188,8 @@ bool CreateNewMode(String mode, const std::map<String, String>* args)
   {
     return false;
   }
+
+  currMode = mode;
 
   return true;
 }

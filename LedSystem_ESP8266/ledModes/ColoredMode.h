@@ -30,7 +30,18 @@ class ColoredMode: public LedMode
 	for(auto it = args->begin(); it != args->end(); it++)
 	{
 		String key = it->first;
-		if(key.length() >= 5 && key.substring(0, 5) == "color")
+		String value = it->second;
+		if(key.length() >= 9 && key.substring(0, 9) == "color-int")
+		{
+			int num = key.length() > 9 ? key.substring(9).toInt() : 0;
+			
+			while(num >= colors.size())
+			{
+				colors.push_back(CRGB::Black);
+			}
+			colors[num] = CRGB(value.toInt());
+		}
+		else if(key.length() >= 5 && key.substring(0, 5) == "color")
 		{
 			int num = key.length() > 5 ? key.substring(5).toInt() : 0;
 			
@@ -38,7 +49,7 @@ class ColoredMode: public LedMode
 			{
 				colors.push_back(CRGB::Black);
 			}
-			colors[num] = CRGB(htmlColorToInt(it->second));
+			colors[num] = CRGB(htmlColorToInt(value));
 		}
 	}
   }
