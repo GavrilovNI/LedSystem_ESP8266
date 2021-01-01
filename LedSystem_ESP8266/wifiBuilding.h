@@ -1,6 +1,8 @@
 #ifndef WIFI_BUILDING_H
 #define WIFI_BUILDING_H
 
+#include <ArduinoOTA.h>
+
 //functions of uploads stages (start, progress, end and error)
 void startOTA()
 {

@@ -1,14 +1,17 @@
 #ifndef LED_SYSTEM_ESP8266_INO
 #define LED_SYSTEM_ESP8266_INO
 
-
 #include <map>
 
-#include <ArduinoOTA.h>
 #include <ESP8266WiFi.h>
 
-#include <ESPAsyncWebServer.h>
+//#define USE_ASYNC_WEB_SERVER
 
+#ifdef USE_ASYNC_WEB_SERVER
+  #include <ESPAsyncWebServer.h>
+#else
+  #include <ESP8266WebServer.h>
+#endif
 
 #include "leds.h"
 #include "wifiBuilding.h"
@@ -21,7 +24,6 @@
 
 
 #include "ledMasks/FullMask.h"
-#include "ledMasks/SplitMask.h"
 #include "ledMasks/GrowNBackMask.h"
 #include "ledMasks/GrowNBack2CenterMask.h"
 #include "ledMasks/RunnerMask.h"
@@ -30,23 +32,59 @@
 #include "html.h"
 
 
-AsyncWebServer server(80);
+#ifdef USE_ASYNC_WEB_SERVER
+  std::map<String, String> getRequestArgs(AsyncWebServerRequest* request)
+  {
+    std::map<String, String> result;
+    for(size_t i = 0; i < request->params(); i++)
+    {
+      AsyncWebParameter* param = request -> getParam(i);
+      result.insert(std::pair<String, String>(param->name(), param->value()));
+    }
+  
+    return result;
+  }
+#else
+  std::map<String, String> getRequestArgs(ESP8266WebServer* server)
+  {
+    std::map<String, String> result;
+    for(int i = 0; i < server->args(); i++)
+    {
+      result.insert(std::pair<String, String>(server->argName(i), server->arg(i)));
+    }
+  
+    return result;
+  }
+#endif
 
-void notFound(AsyncWebServerRequest *request) {
-  request->send(404, "text/plain", "Not found");
-}
+#ifdef USE_ASYNC_WEB_SERVER
+  AsyncWebServer server(80);
+
+  void notFound(AsyncWebServerRequest *request) {
+    request->send(404, "text/plain", "Not found");
+  }
+#else
+  ESP8266WebServer server(80);
+
+  void notFound() {
+    server.send(404, "text/plain", "Not found");
+  }
+#endif
 
 
 bool connectToWifi()
 {
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+  //Serial.print("Connecting to ");
+  //Serial.println(ssid);
 
   if(WiFi.status() == WL_CONNECTED)
   {
-    Serial.println("Already connected!");
+    //Serial.println("Already connected!");
     return true;
   }
+
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
 
   WiFi.begin(ssid, password);
   int i = 0;
@@ -171,29 +209,9 @@ void UpdateMask(String mask)
   }
 }
 
-void setup()
+void UpdateLeds(std::map<String, String> args)
 {
-  Serial.begin(115200);
-  Serial.println("starting");
-
-  if(!connectToWifi())
-  {
-    delay(1000);
-    ESP.restart();
-    return;
-  }
-  setupWifiBuilding();
-
-  
-
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
-    request->send_P(200, "text/html", index_html);
-  });
-  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request)
-  {
-    auto args = getRequestArgs(request);
-
-    for(auto it = args.begin(); it != args.end(); it++)
+  for(auto it = args.begin(); it != args.end(); it++)
     {
       String key = it->first;
       String value = it->second;
@@ -228,12 +246,36 @@ void setup()
     }
 
     UpdateMode(&args);
+}
 
-    
+void setup()
+{
+  Serial.begin(115200);
+  Serial.println("ESP started");
+
+  connectToWifi();
+  setupWifiBuilding();
+
+#ifdef USE_ASYNC_WEB_SERVER
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
+    request->send_P(200, "text/html", index_html);
+  });
+  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request)
+  {
+    UpdateLeds(getRequestArgs(request));
     request->send(200, "text/html", index_html);
 
   });
+#else
+  server.on("/", HTTP_GET, [](){
+    server.send(200, "text/html", index_html);
+  });
 
+  server.on("/get", HTTP_GET, [](){
+    UpdateLeds(getRequestArgs(&server));
+    server.send(200, "text/html", index_html);
+  });
+#endif
 
   server.onNotFound(notFound);
   server.begin();
@@ -252,6 +294,9 @@ void loop()
   connectToWifi();
   loopWifiBuilding();
 
+#ifndef USE_ASYNC_WEB_SERVER
+  server.handleClient();
+#endif
 
   if (ledMode != nullptr)
   {
