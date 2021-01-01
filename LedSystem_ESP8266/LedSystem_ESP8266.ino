@@ -224,43 +224,42 @@ void UpdateMask(String mask)
   }
 }
 
-void UpdateLeds(std::map<String, String> args)
+void UpdateLeds(const std::map<String, String>* args)
 {
-  for(auto it = args.begin(); it != args.end(); it++)
+  for(auto it = args->begin(); it != args->end(); it++)
+  {
+    String key = it->first;
+    String value = it->second;
+    if(key == "brightness")
     {
-      String key = it->first;
-      String value = it->second;
-      if(key == "brightness")
-      {
-        LEDS.setBrightness(clamp(value.toInt(), 0, 255));
-      }
-      else if(key == "update_period")
-      {
-        updatePeriod = clamp(value.toInt(), 1, 1000);
-      }
-      else if(key == "mode_speed")
-      {
-        modeSpeed = clamp(value.toInt(), 0, 100);
-      }
-      else if(key == "mode_inverted")
-      {
-        modeInverted = value == "1";
-      }
-      else if(key == "mask_speed")
-      {
-        maskSpeed = clamp(value.toInt(), 0, 100);
-      }
-      else if(key == "mask_inverted")
-      {
-        maskInverted = value == "1";
-      }
-      else if(key == "mask")
-      {
-        UpdateMask(value);
-      }
+      LEDS.setBrightness(clamp(value.toInt(), 0, 255));
     }
-
-    UpdateMode(&args);
+    else if(key == "update_period")
+    {
+      updatePeriod = clamp(value.toInt(), 1, 1000);
+    }
+    else if(key == "mode_speed")
+    {
+      modeSpeed = clamp(value.toInt(), 0, 100);
+    }
+    else if(key == "mode_inverted")
+    {
+      modeInverted = value == "1";
+    }
+    else if(key == "mask_speed")
+    {
+      maskSpeed = clamp(value.toInt(), 0, 100);
+    }
+    else if(key == "mask_inverted")
+    {
+      maskInverted = value == "1";
+    }
+    else if(key == "mask")
+    {
+      UpdateMask(value);
+    }
+  }
+  UpdateMode(args);
 }
 
 void setup()
@@ -277,7 +276,10 @@ void setup()
   });
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request)
   {
-    UpdateLeds(getRequestArgs(request));
+    auto args = getRequestArgs(request);
+    Serial.println("Got async not secure '/get':");
+    printArgs(&args);
+    UpdateLeds(&args);
     request->send(200, "text/html", index_html);
 
   });
@@ -290,7 +292,10 @@ void setup()
   });
 
   server.on("/get", HTTP_GET, [](){
-    UpdateLeds(getRequestArgs(&server));
+    auto args = getRequestArgs(&server);
+    Serial.println("Got not async not secure '/get':");
+    printArgs(&args);
+    UpdateLeds(&args);
     server.send(200, "text/html", index_html);
   });
 #ifdef USE_SECURE_WEB_SERVER
@@ -303,7 +308,10 @@ void setup()
   });
 
   secureServer.on("/get", HTTP_GET, [](){
-    UpdateLeds(getRequestArgs(&secureServer));
+    auto args = getRequestArgs(&secureServer);
+    Serial.println("Got not async secure '/get':");
+    printArgs(&args);
+    UpdateLeds(&args);
     secureServer.send(200, "text/html", index_html);
   });
 

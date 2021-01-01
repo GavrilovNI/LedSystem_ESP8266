@@ -1,6 +1,25 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <map>
+
+void printArgs(const std::map<String, String>* args)
+{
+  int i=0;
+  Serial.print("Args(");
+  Serial.print(args->size());
+  Serial.println("):");
+  for(auto it = args->begin(); it!=args->end(); it++, i++)
+  {
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.print(it->first);
+    Serial.print("=");
+    Serial.println(it->second);
+  }
+}
+
+
 int StrToInt(String value)
 {
   if(value.length()>0 && value[0]=='-')
