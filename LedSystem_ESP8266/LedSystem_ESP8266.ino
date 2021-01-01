@@ -6,11 +6,16 @@
 #include <ESP8266WiFi.h>
 
 //#define USE_ASYNC_WEB_SERVER
+#define USE_SECURE_WEB_SERVER
 
 #ifdef USE_ASYNC_WEB_SERVER
   #include <ESPAsyncWebServer.h>
 #else
+  //#include <ESP8266mDNS.h>
   #include <ESP8266WebServer.h>
+#ifdef USE_SECURE_WEB_SERVER
+  #include <ESP8266WebServerSecure.h>
+#endif
 #endif
 
 #include "leds.h"
@@ -45,7 +50,9 @@
     return result;
   }
 #else
-  std::map<String, String> getRequestArgs(ESP8266WebServer* server)
+
+  template<typename ServerType>
+  std::map<String, String> getRequestArgs(esp8266webserver::ESP8266WebServerTemplate<ServerType>* server)
   {
     std::map<String, String> result;
     for(int i = 0; i < server->args(); i++)
@@ -65,10 +72,18 @@
   }
 #else
   ESP8266WebServer server(80);
-
+  
   void notFound() {
     server.send(404, "text/plain", "Not found");
   }
+
+  #ifdef USE_SECURE_WEB_SERVER
+    BearSSL::ESP8266WebServerSecure secureServer(445);
+    void notFoundSecure() {
+      secureServer.send(404, "text/plain", "Not found");
+    }
+  #endif
+  
 #endif
 
 
@@ -267,6 +282,9 @@ void setup()
 
   });
 #else
+
+  
+
   server.on("/", HTTP_GET, [](){
     server.send(200, "text/html", index_html);
   });
@@ -275,6 +293,25 @@ void setup()
     UpdateLeds(getRequestArgs(&server));
     server.send(200, "text/html", index_html);
   });
+#ifdef USE_SECURE_WEB_SERVER
+
+  //configTime(8 * 3600, 0, "0.ru.pool.ntp.org", "1.ru.pool.ntp.org", "2.ru.pool.ntp.org");
+
+  secureServer.getServer().setRSACert(&certificate, &privateKey);
+  secureServer.on("/", HTTP_GET, [](){
+    secureServer.send(200, "text/html", index_html);
+  });
+
+  secureServer.on("/get", HTTP_GET, [](){
+    UpdateLeds(getRequestArgs(&secureServer));
+    secureServer.send(200, "text/html", index_html);
+  });
+
+
+  secureServer.onNotFound(notFoundSecure);
+  secureServer.begin();
+  
+#endif
 #endif
 
   server.onNotFound(notFound);
@@ -296,6 +333,10 @@ void loop()
 
 #ifndef USE_ASYNC_WEB_SERVER
   server.handleClient();
+#ifdef USE_SECURE_WEB_SERVER
+  secureServer.handleClient();
+#endif
+  //MDNS.update();
 #endif
 
   if (ledMode != nullptr)
