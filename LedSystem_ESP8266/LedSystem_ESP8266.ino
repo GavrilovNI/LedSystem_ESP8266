@@ -3,7 +3,6 @@
 
 #include <ArduinoOTA.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266WiFiMulti.h>
 
 #include <ESPAsyncWebServer.h>
 
@@ -27,8 +26,6 @@
 #include "utils.h"
 #include "html.h"
 
-ESP8266WiFiMulti wifiMulti;
-
 
 AsyncWebServer server(80);
 
@@ -37,36 +34,37 @@ void notFound(AsyncWebServerRequest *request) {
 }
 
 
-void connectToWifi()
+bool connectToWifi()
 {
-  Serial.print("Connecting to " + String(ssid) + " ...");
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
 
-  while (wifiMulti.run() != WL_CONNECTED)
+  if(WiFi.status() == WL_CONNECTED)
   {
-    delay(250);
-    Serial.print('.');
+    Serial.println("Already connected!");
+    return true;
   }
 
-  Serial.print("Connected. IP address: ");
-  Serial.println(WiFi.localIP());
-}
-
-
-void tryConnectToWifi()
-{
-  Serial.print("Connecting to " + String(ssid) + " ...");
-
-  if (wifiMulti.run() == WL_CONNECTED)
+  WiFi.begin(ssid, password);
+  int i = 0;
+  while (WiFi.status() != WL_CONNECTED && i<20)
   {
-    Serial.print("Connected. IP address: ");
+    delay(500);
+    Serial.print('.');
+    i++;
+  }
+
+  if(WiFi.status() == WL_CONNECTED)
+  {
+    Serial.print("Connected. IP: ");
     Serial.println(WiFi.localIP());
+    return true;
   }
   else
   {
-    Serial.print("Not connected.");
+    Serial.println("Fail. Not connected.");
+    return false;
   }
-
-
 }
 
 
@@ -171,8 +169,12 @@ void setup()
   Serial.begin(115200);
   Serial.println("starting");
 
-  wifiMulti.addAP(ssid, password);
-  connectToWifi();
+  if(!connectToWifi())
+  {
+    delay(1000);
+    ESP.restart();
+    return;
+  }
   setupWifiBuilding();
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
@@ -230,10 +232,7 @@ void setup()
 
 void loop()
 {
-  if (wifiMulti.run() != WL_CONNECTED)
-  {
-    tryConnectToWifi();
-  }
+  connectToWifi();
   loopWifiBuilding();
 
 
