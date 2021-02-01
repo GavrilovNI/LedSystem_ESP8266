@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <Arduino.h>
+#include <pixeltypes.h>
 #include <map>
 
 void printArgs(const std::map<String, String>* args)

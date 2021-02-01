@@ -4,6 +4,7 @@
 #include <pixeltypes.h>
 #include <vector>
 #include "LedMode.h"
+#include "utils.h"
 
 
 class ColoredMode: public LedMode

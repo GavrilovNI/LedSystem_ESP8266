@@ -5,18 +5,7 @@
 
 #include <ESP8266WiFi.h>
 
-//#define USE_ASYNC_WEB_SERVER
-#define USE_SECURE_WEB_SERVER
 
-#ifdef USE_ASYNC_WEB_SERVER
-  #include <ESPAsyncWebServer.h>
-#else
-  //#include <ESP8266mDNS.h>
-  #include <ESP8266WebServer.h>
-#ifdef USE_SECURE_WEB_SERVER
-  #include <ESP8266WebServerSecure.h>
-#endif
-#endif
 
 #include "leds.h"
 #include "wifiBuilding.h"
@@ -34,57 +23,14 @@
 #include "ledMasks/RunnerMask.h"
 
 #include "utils.h"
-#include "html.h"
+
+#include <SD.h>
 
 
-#ifdef USE_ASYNC_WEB_SERVER
-  std::map<String, String> getRequestArgs(AsyncWebServerRequest* request)
-  {
-    std::map<String, String> result;
-    for(size_t i = 0; i < request->params(); i++)
-    {
-      AsyncWebParameter* param = request -> getParam(i);
-      result.insert(std::pair<String, String>(param->name(), param->value()));
-    }
-  
-    return result;
-  }
-#else
 
-  template<typename ServerType>
-  std::map<String, String> getRequestArgs(esp8266webserver::ESP8266WebServerTemplate<ServerType>* server)
-  {
-    std::map<String, String> result;
-    for(int i = 0; i < server->args(); i++)
-    {
-      result.insert(std::pair<String, String>(server->argName(i), server->arg(i)));
-    }
-  
-    return result;
-  }
-#endif
+#include <webServer.h>
 
-#ifdef USE_ASYNC_WEB_SERVER
-  AsyncWebServer server(80);
 
-  void notFound(AsyncWebServerRequest *request) {
-    request->send(404, "text/plain", "Not found");
-  }
-#else
-  ESP8266WebServer server(80);
-  
-  void notFound() {
-    server.send(404, "text/plain", "Not found");
-  }
-
-  #ifdef USE_SECURE_WEB_SERVER
-    BearSSL::ESP8266WebServerSecure secureServer(445);
-    void notFoundSecure() {
-      secureServer.send(404, "text/plain", "Not found");
-    }
-  #endif
-  
-#endif
 
 
 bool connectToWifi()
@@ -139,27 +85,6 @@ bool maskInverted = false;
 float updatePeriod = 20; // in ms
 unsigned long timeBeforeDelay;
 
-void UpdateMode(const std::map<String, String>* args)
-{
-  auto modeIt = args->find("mode");
-  if (modeIt != args->end())
-  {
-    const String mode = modeIt->second;
-
-    if (currMode == mode)
-    {
-      ledMode->Update(args);
-    }
-    else
-    {
-      CreateNewMode(mode, args);
-    }
-  }
-  else if(currMode != "off")
-  {
-    ledMode->Update(args);
-  }
-}
 
 bool CreateNewMode(String mode, const std::map<String, String>* args)
 {
@@ -193,6 +118,30 @@ bool CreateNewMode(String mode, const std::map<String, String>* args)
 
   return true;
 }
+
+void UpdateMode(const std::map<String, String>* args)
+{
+  auto modeIt = args->find("mode");
+  if (modeIt != args->end())
+  {
+    const String mode = modeIt->second;
+
+    if (currMode == mode)
+    {
+      ledMode->Update(args);
+    }
+    else
+    {
+      CreateNewMode(mode, args);
+    }
+  }
+  else if(currMode != "off")
+  {
+    ledMode->Update(args);
+  }
+}
+
+
 
 void UpdateMask(String mask)
 {
@@ -268,66 +217,27 @@ void UpdateLeds(const std::map<String, String>* args)
 
 void setup()
 {
-  Serial.begin(115200);
-  Serial.println("ESP started");
-
-  connectToWifi();
-  setupWifiBuilding();
-
-#ifdef USE_ASYNC_WEB_SERVER
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
-    request->send_P(200, "text/html", index_html);
-  });
-  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request)
-  {
-    auto args = getRequestArgs(request);
-    Serial.println("Got async not secure '/get':");
-    printArgs(&args);
-    UpdateLeds(&args);
-    request->send(200, "text/html", index_html);
-
-  });
-#else
-
-  
-
-  server.on("/", HTTP_GET, [](){
-    server.send(200, "text/html", index_html);
-  });
-
-  server.on("/get", HTTP_GET, [](){
-    auto args = getRequestArgs(&server);
-    Serial.println("Got not async not secure '/get':");
-    printArgs(&args);
-    UpdateLeds(&args);
-    server.send(200, "text/html", index_html);
-  });
-#ifdef USE_SECURE_WEB_SERVER
-
-  //configTime(8 * 3600, 0, "0.ru.pool.ntp.org", "1.ru.pool.ntp.org", "2.ru.pool.ntp.org");
-
-  secureServer.getServer().setRSACert(&certificate, &privateKey);
-  secureServer.on("/", HTTP_GET, [](){
-    secureServer.send(200, "text/html", index_html);
-  });
-
-  secureServer.on("/get", HTTP_GET, [](){
-    auto args = getRequestArgs(&secureServer);
-    Serial.println("Got not async secure '/get':");
-    printArgs(&args);
-    UpdateLeds(&args);
-    secureServer.send(200, "text/html", index_html);
-  });
+    Serial.begin(115200);
+    Serial.println("ESP started");
 
 
-  secureServer.onNotFound(notFoundSecure);
-  secureServer.begin();
-  
-#endif
-#endif
+    // SCK -> D5
+    // MISO -> D6
+    // MOSI -> D7
+    const int CSpin = D8;
 
-  server.onNotFound(notFound);
-  server.begin();
+    if(!SD.begin(CSpin))
+    {
+        Serial.println("No SD card found. Restarting in 5 sec...");
+        delay(5000);
+        ESP.restart();
+    }
+
+    connectToWifi();
+    setupWifiBuilding();
+
+    webServerSetup();
+
 
   leds = new Leds();
   CreateNewMode("off", nullptr);
@@ -343,13 +253,7 @@ void loop()
   connectToWifi();
   loopWifiBuilding();
 
-#ifndef USE_ASYNC_WEB_SERVER
-  server.handleClient();
-#ifdef USE_SECURE_WEB_SERVER
-  secureServer.handleClient();
-#endif
-  //MDNS.update();
-#endif
+  webServerLoop();
 
   if (ledMode != nullptr)
   {

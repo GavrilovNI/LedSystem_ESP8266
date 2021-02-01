@@ -1,18 +1,17 @@
-#ifndef LEDS_H
-#define LEDS_H
+#pragma once
 
 #define FASTLED_ESP8266_RAW_PIN_ORDER
 //#define FASTLED_ESP8266_NODEMCU_PIN_ORDER
 //#define FASTLED_ESP8266_D1_PIN_ORDER
 
-#define FASTLED_ALL_PINS_HARDWARE_SPI
-#define ESP8266_SPI
+//#define FASTLED_ALL_PINS_HARDWARE_SPI
+//#define ESP8266_SPI
 
 #include <FastLED.h>
 
-#include "utils.h"
+//#include "utils.h"
 
-#define LED_COUNT 120
+#define LED_COUNT 51
 #define LED_DT 3
 #define DEFAULT_BRIGHTNESS 50
 
@@ -66,7 +65,3 @@ class Leds
   }
 };
 
-
-
-
-#endif // LEDS_H
